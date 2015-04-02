@@ -12,11 +12,12 @@ abstract class AbstractQueryDirector {
 
 class SelectQuery {
     private $query = NULL;
-    private $anchor_table = NULL;
+    private $anchor_table = 'packets';
     private $join_tables = [];
     private $params = [];
     private $limit = NULL;
     private $order = NULL;
+    private $columns = NULL;
     
     function __construct() {
     }
@@ -40,8 +41,17 @@ class SelectQuery {
     
     }
     
-    function format_query() {
+    function set_columns( $columns ) {
+        if( $columns === NULL )
+            {
+            $this->columns = '*';
+            }
+    }
     
+    function format_query() {
+        $this->query = '"""SELECT ' . $this->columns . ' ';
+        $this->query .= 'FROM ' . $this->anchor_table;
+        $this->query .= '"""';
     }
     
     public function __toString() {
@@ -68,8 +78,12 @@ class SelectQueryBuilder extends AbstractQueryBuilder {
         $this->query->set_limit( $limit );
     }
     
-    function set_order( $order ) {
-    $this->query->set_order( $order );
+    function set_order( $order = NULL ) {
+        $this->query->set_order( $order );
+    }
+    
+    function set_columns( $columns = NULL ) {
+        $this->query->set_columns( $columns );
     }
     
     function format_query() {
@@ -91,7 +105,8 @@ class SelectQueryDirector extends AbstractQueryDirector {
     public function build_query( /* json structure from GET query */) {
         //set_tables()
         //etc.
-        $this->builder->format_query()
+        $this->builder->set_columns();
+        $this->builder->format_query();
     }
     
     public function get_query() {
