@@ -49,9 +49,9 @@ class SelectQuery {
     }
     
     function format_query() {
-        $this->query = '"""SELECT ' . $this->columns . ' ';
+        $this->query = 'SELECT ' . $this->columns . ' ';
         $this->query .= 'FROM ' . $this->anchor_table;
-        $this->query .= '"""';
+        $this->query .= ';';
     }
     
     public function __toString() {
