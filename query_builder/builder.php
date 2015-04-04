@@ -43,7 +43,7 @@ class SelectQuery {
     
     function set_columns( $columns = NULL) {
 		// if an empty string or null is provided get all columns
-		if( $columns === NULL or $columns == "" )
+		if( empty($columns))
             {
             $this->columns = '*';
             }
