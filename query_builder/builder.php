@@ -14,7 +14,7 @@ class SelectQuery {
     private $query = NULL;
     private $anchor_table = 'packets';
     private $join_tables = [];
-    private $params = [];
+    private $params = NULL;
     private $limit = NULL;
     private $order = NULL;
     private $columns = NULL;
@@ -30,7 +30,15 @@ class SelectQuery {
     }
     
     function set_params( $params = NULL ) {
-    
+		if( isset( $params ) )
+		{
+			foreach( $params as $param ) {
+				$this->params .= 'AND ' . $param . ' ';
+			}
+			$this->params = trim($this->params, 'AND');
+			$this->params = trim($this->params);
+			$this->params = 'WHERE ' . $this->params;
+		}
     }
     
     function set_limit( $limit = NULL ) {
@@ -59,6 +67,8 @@ class SelectQuery {
     function format_query() {
         $this->query = 'SELECT ' . $this->columns . ' ';
         $this->query .= 'FROM ' . $this->anchor_table;
+		$this->query .= $this->params;
+		$this->query = trim($this->query);
         $this->query .= ';';
     }
     
@@ -114,6 +124,7 @@ class SelectQueryDirector extends AbstractQueryDirector {
         //set_tables()
         //etc.
         $this->builder->set_columns();
+		$this->builder->set_params();
         $this->builder->format_query();
     }
     
