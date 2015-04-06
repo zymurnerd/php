@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/../../hzphp/tools/loader.php';
 
 abstract class AbstractQueryBuilder {
     abstract function get_query();
@@ -18,60 +19,80 @@ class SelectQuery {
     private $limit = NULL;
     private $order = NULL;
     private $columns = NULL;
-    
+
     function __construct() {
     }
-    
-    function set_tables( $tables = NULL ) {
-        if( $tables === NULL )
+
+    function set_join_tables( $tables = NULL ) {
+        if( !isset( $tables ) )
             {
-            //WCD - handle error
+            return NULL;
             }
+        if( !is_array( $tables ) )
+        {
+            $tables = explode( " ", $tables );
+        }
+        $this->join_tables = array_values( array_diff( $tables, [ "packets" ] ) );
     }
-    
+
     function set_params( $params = NULL ) {
-		if( isset( $params ) )
-		{
-			foreach( $params as $param ) {
-				$this->params .= 'AND ' . $param . ' ';
-			}
-			$this->params = trim($this->params, 'AND');
-			$this->params = trim($this->params);
-			$this->params = 'WHERE ' . $this->params;
-		}
+        if( empty( $params ) ) {
+            $this->params = NULL;
+        }
+        elseif( !is_array( $params ) )
+        {
+            $this->params = explode( " ", $params );
+        }
+        else {
+            $this->params = $params;
+        }
     }
-    
+
     function set_limit( $limit = NULL ) {
-    
+
     }
-    
+
     function set_order( $order ) {
-    
+
     }
-    
+
     function set_columns( $columns = NULL) {
-		// if an empty string or null is provided get all columns
-		if( empty($columns))
+        // if an empty string or null is provided get all columns
+        if( empty($columns))
             {
             $this->columns = '*';
             }
-		// if an array of columns is provided, link them with a comma
-		elseif( is_array( $columns ) ) {
-			$this->columns = implode( ', ', $columns );
-		}
-		else {
-			$this->columns = $columns;
-		}
+        // if an array of columns is provided, link them with a comma
+        elseif( is_array( $columns ) ) {
+            $this->columns = implode( ', ', $columns );
+        }
+        else {
+            $this->columns = $columns;
+        }
     }
-    
+
     function format_query() {
         $this->query = 'SELECT ' . $this->columns . ' ';
-        $this->query .= 'FROM ' . $this->anchor_table;
-		$this->query .= $this->params;
-		$this->query = trim($this->query);
+        $this->query .= 'FROM ' . $this->anchor_table . ' ';
+        foreach( $this->join_tables as $table )
+        {
+            $this->query .= 'JOIN ' . $table . ' ON packets.row_id = ' . $table . '.parent_row_id ';
+        }
+        if( !empty( $this->params ) )
+        {
+            $this->query .= 'WHERE ';
+            foreach( $this->params as $param ) {
+                $this->query .=  $param . ' AND ';
+            }
+            $this->query = trim($this->query, 'AND ');
+            $this->query = trim($this->query);
+        }
+        
+        
+        $this->query = trim($this->query);
         $this->query .= ';';
     }
-    
+
     public function __toString() {
         return $this->query;
     }
@@ -79,35 +100,35 @@ class SelectQuery {
 
 class SelectQueryBuilder extends AbstractQueryBuilder {
     private $query = NULL;
-    
+
     function __construct() {
         $this->query = new SelectQuery();
     }
-    
-    function set_tables( $tables = NULL ) {
-        $this->query->set_tables( $tables );
+
+    function set_join_tables( $tables = NULL ) {
+        $this->query->set_join_tables( $tables );
     }
-    
+
     function set_params( $params = NULL ) {
         $this->query->set_params( $params );
     }
-    
+
     function set_limit( $limit = NULL ) {
         $this->query->set_limit( $limit );
     }
-    
+
     function set_order( $order = NULL ) {
         $this->query->set_order( $order );
     }
-    
+
     function set_columns( $columns = NULL ) {
         $this->query->set_columns( $columns );
     }
-    
+
     function format_query() {
         $this->query->format_query();
     }
-    
+
     function get_query() {
         return $this->query;
     }
@@ -115,31 +136,40 @@ class SelectQueryBuilder extends AbstractQueryBuilder {
 
 class SelectQueryDirector extends AbstractQueryDirector {
     private $builder = NULL;
-    
+
     public function __construct( AbstractQueryBuilder $builder ) {
         $this->builder = $builder;
     }
-    
-    public function build_query( /* json structure from GET query */) {
-        //set_tables()
-        //etc.
-        $this->builder->set_columns();
-		$this->builder->set_params();
+
+    public function build_query( $json_data = NULL ) {
+        if( !isset( $json_data ) )
+        {
+            return NULL;
+        }
+        if( !array_key_exists( "columns", $json_data ) )
+        {
+            $json_data["columns"] = NULL;
+        }
+        if( !array_key_exists( "params", $json_data ) )
+        {
+            $json_data["params"] = NULL;
+        }
+        if( !array_key_exists( "tables", $json_data ) )
+        {
+            $json_data["tables"] = NULL;
+        }
+        $this->builder->set_columns( $json_data[ "columns" ] );
+        $this->builder->set_params( $json_data[ "params" ] );
+        $this->builder->set_join_tables( $json_data[ "tables" ] );
         $this->builder->format_query();
     }
-    
+
     public function get_query() {
         return $this->builder->get_query();
     }
 
 }
 
-/* Test Execution */
-$query_builder = new SelectQueryBuilder();
-$query_director = new SelectQueryDirector( $query_builder );
-$query_director->build_query( /* json structure */ );
-$query = $query_director->get_query();
-echo $query;
 
 
 

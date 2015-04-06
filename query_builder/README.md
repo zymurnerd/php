@@ -11,3 +11,7 @@ Notes
 To Do
 -----
 - Break classes out of singular builder module.
+
+Known Bugs
+----------
+- String in parameters (for WHERE clause) are not dynamically put in quotes. This causes an issue if the user doesn't quote them in the GET request
