@@ -1,17 +1,18 @@
 query_builder
 =============
 
-Purpose
--------
+### Purpose
 The reason for this module is to create a sqlite query builder based on the builder design pattern.
 
-Notes
------
 
-To Do
------
+### Notes
+
+
+### To Do
+- Implement usage of prepared statements for safety.
 - Break classes out of singular builder module.
 
-Known Bugs
-----------
-- String in parameters (for WHERE clause) are not dynamically put in quotes. This causes an issue if the user doesn't quote them in the GET request
+
+### Known Bugs
+- String in parameters (for WHERE clause) are not dynamically put in quotes.  
+  This causes an issue if the user doesn't quote them in the GET request
