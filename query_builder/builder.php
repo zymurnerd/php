@@ -76,7 +76,7 @@ class SelectQuery {
         $this->query .= 'FROM ' . $this->anchor_table . ' ';
         foreach( $this->join_tables as $table )
         {
-            $this->query .= 'JOIN ' . $table . ' ON packets.row_id = ' . $table . '.parent_row_id ';
+            $this->query .= 'JOIN ' . $table . ' ON packets.row_id = ' . $table . '.packet_row_id ';
         }
         if( !empty( $this->params ) )
         {
