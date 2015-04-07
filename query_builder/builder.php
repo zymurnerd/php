@@ -46,6 +46,14 @@ class SelectQuery {
         else {
             $this->params = $params;
         }
+        foreach( $this->params as $key => $param ) {
+            $pattern = '~(?P<key>[^\d\s]+)=(?P<value>[^\']+)~';
+            preg_match($pattern, $param, $matches);
+            if( isset( $matches['key'] ) && isset( $matches['value'] ) ) {
+                $this->params[$key] = trim($matches['key'] ) . '=\'' . trim($matches['value'] ) . '\'';
+            }
+            
+        }
     }
 
     function set_limit( $limit = NULL ) {
