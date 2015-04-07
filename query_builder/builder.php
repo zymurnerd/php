@@ -38,6 +38,7 @@ class SelectQuery {
     function set_params( $params = NULL ) {
         if( empty( $params ) ) {
             $this->params = NULL;
+            return;
         }
         elseif( !is_array( $params ) )
         {
