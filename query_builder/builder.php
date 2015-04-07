@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../hzphp/tools/loader.php';
+
 
 abstract class AbstractQueryBuilder {
     abstract function get_query();
