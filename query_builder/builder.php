@@ -115,6 +115,7 @@ class SelectQuery {
             }
             $this->query = trim($this->query, 'AND ');
             $this->query = trim($this->query);
+            $this->query .= ' ';
         }
          
         if( !empty( $this->order ) )
