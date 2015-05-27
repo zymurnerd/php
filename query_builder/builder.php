@@ -1,6 +1,5 @@
 <?php
 
-
 abstract class AbstractQueryBuilder {
     abstract function get_query();
 }
@@ -58,11 +57,32 @@ class SelectQuery {
     }
 
     function set_limit( $limit = NULL ) {
-
+        if( empty( $limit ) ) {
+            $this->limit = NULL;
+            return;
+        }
+        elseif( is_array( $limit ) )
+        {
+            $this->limit = implode( " ", $limit );
+            echo $this->limit;
+        }
+        else {
+            $this->limit = $limit;
+        }
     }
 
     function set_order( $order ) {
-
+        if( empty( $order ) ) {
+            $this->order = NULL;
+            return;
+        }
+        elseif( is_array( $order ) )
+        {
+            $this->order = implode( ",", $order );
+        }
+        else {
+            $this->order = $order;
+        }
     }
 
     function set_columns( $columns = NULL) {
@@ -96,7 +116,16 @@ class SelectQuery {
             $this->query = trim($this->query, 'AND ');
             $this->query = trim($this->query);
         }
-        
+         
+        if( !empty( $this->order ) )
+        {
+            $this->query .= 'ORDER BY ' . $this->order . ' ';
+        } 
+         
+        if( !empty( $this->limit ) )
+        {
+            $this->query .= 'LIMIT ' . $this->limit . ' ';
+        }
         
         $this->query = trim($this->query);
         $this->query .= ';';
@@ -167,9 +196,19 @@ class SelectQueryDirector extends AbstractQueryDirector {
         {
             $json_data["tables"] = NULL;
         }
+        if( !array_key_exists( "limit", $json_data ) )
+        {
+            $json_data["limit"] = NULL;
+        }
+        if( !array_key_exists( "order", $json_data ) )
+        {
+            $json_data["order"] = NULL;
+        }
         $this->builder->set_columns( $json_data[ "columns" ] );
         $this->builder->set_params( $json_data[ "params" ] );
         $this->builder->set_join_tables( $json_data[ "tables" ] );
+        $this->builder->set_limit( $json_data[ "limit" ] );
+        $this->builder->set_order( $json_data[ "order" ] );
         $this->builder->format_query();
     }
 
